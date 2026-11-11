@@ -1,6 +1,6 @@
 // Service worker: hanya menyimpan "kerangka" aplikasi (halaman pembungkus + ikon).
 // Data tabungan TIDAK disimpan offline; semua request ke Google Apps Script langsung ke jaringan.
-const VERSI = 'tabungan-santri-v2';
+const VERSI = 'tabungan-santri-v3';
 const KERANGKA = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', function (e) {
