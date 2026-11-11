@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tabungan Santri - PP Misbahul Munir</title>
+  <meta name="theme-color" content="#7A0043">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tabungan Santri">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: #7A0043; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    #app { position: fixed; inset: 0; border: 0; width: 100%; height: 100%; background: #7A0043; opacity: 0; transition: opacity .25s; }
+    #app.ready { opacity: 1; }
+    .overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #fff; text-align: center; padding: 24px; }
+    .overlay img { width: 84px; height: 84px; border-radius: 22px; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+    .overlay .t { font-weight: 700; font-size: 15px; }
+    .overlay .s { font-size: 12px; opacity: .8; max-width: 260px; line-height: 1.5; }
+    .spin { width: 26px; height: 26px; border: 3px solid rgba(255,255,255,.25); border-top-color: #FFD700; border-radius: 50%; animation: r .8s linear infinite; }
+    @keyframes r { to { transform: rotate(360deg); } }
+    button { background: #FFD700; color: #580030; border: 0; border-radius: 12px; padding: 11px 22px; font-weight: 700; font-size: 13px; cursor: pointer; }
+    #err { display: none; background: #7A0043; z-index: 2; }
+  </style>
+</head>
+<body>
+  <div class="overlay" id="loading">
+    <img src="icons/icon-192.png" alt="">
+    <div class="t">PP Misbahul Munir</div>
+    <div class="spin"></div>
+  </div>
+
+  <div class="overlay" id="err">
+    <img src="icons/icon-192.png" alt="">
+    <div class="t">Tidak bisa terhubung</div>
+    <div class="s" id="err-msg">Periksa koneksi internet, lalu coba lagi.</div>
+    <button onclick="muat()">Coba Lagi</button>
+  </div>
+
+  <iframe id="app" title="Tabungan Santri" allow="clipboard-write; clipboard-read"></iframe>
+
+  <script>
+    // === GANTI jika URL deployment Apps Script berubah ===
+    var GAS_URL = 'https://script.google.com/macros/s/AKfycbxwZuLETsHnhputABM_8QMNoW0zlVc1OT_XMi5u4U8eixdffu_pdxBOBJSCM6IWDq0M/exec';
+
+    var frame = document.getElementById('app');
+    var loading = document.getElementById('loading');
+    var err = document.getElementById('err');
+    var timer = null;
+
+    function tampilError(pesan) {
+      loading.style.display = 'none';
+      err.style.display = 'flex';
+      if (pesan) document.getElementById('err-msg').textContent = pesan;
+    }
+
+    function muat() {
+      err.style.display = 'none';
+      loading.style.display = 'flex';
+      frame.classList.remove('ready');
+      if (!navigator.onLine) { tampilError('Tidak ada koneksi internet. Data tabungan membutuhkan internet.'); return; }
+      clearTimeout(timer);
+      timer = setTimeout(function () { tampilError('Server lama merespons. Coba lagi.'); }, 25000);
+      frame.src = GAS_URL;
+    }
+
+    frame.addEventListener('load', function () {
+      clearTimeout(timer);
+      loading.style.display = 'none';
+      frame.classList.add('ready');
+    });
+
+    window.addEventListener('online', function () { if (err.style.display === 'flex') muat(); });
+    window.addEventListener('offline', function () { tampilError('Tidak ada koneksi internet. Data tabungan membutuhkan internet.'); });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+    }
+    muat();
+  </script>
+</body>
+</html>
